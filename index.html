@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>XSMT 7 ngày gần nhất</title>
+
+<style>
+
+body{
+    margin:20px;
+    font-family:Arial,sans-serif;
+    background:#f2f2f2;
+}
+
+.board{
+
+    background:white;
+
+    border-radius:8px;
+
+    margin-bottom:30px;
+
+    padding:15px;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+
+}
+
+.board h2{
+
+    margin:0 0 15px;
+
+    text-align:center;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+th,td{
+
+    border:1px solid #bbb;
+
+    padding:6px;
+
+    text-align:center;
+
+}
+
+th{
+
+    background:#1976d2;
+
+    color:white;
+
+}
+
+.copyBtn{
+
+    margin-top:12px;
+
+    width:100%;
+
+    padding:10px;
+
+    border:none;
+
+    border-radius:5px;
+
+    background:#2196F3;
+
+    color:white;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+}
+
+.copyBtn:hover{
+
+    background:#0b7dda;
+
+}
+
+.loading{
+
+    text-align:center;
+
+    font-size:22px;
+
+    margin-top:50px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="content" class="loading">
+
+Đang tải dữ liệu...
+
+</div>
+
+<script>
+
+const API_URL="https://script.google.com/macros/s/AKfycbxhdCew9Nh1HWqvnnpl-iR5ZDvGdgqk3vjZXCZy7bo7nkkmsX-jUSvgSe_ss2r4j6Rk/exec";
+
+loadData();
+
+async function loadData(){
+
+    try{
+
+        const res=await fetch(API_URL);
+
+        const data=await res.json();
+
+        render(data);
+
+    }
+
+    catch(e){
+
+        document.getElementById("content").innerHTML="Không tải được dữ liệu.";
+
+        console.log(e);
+
+    }
+
+}
+
+function render(days){
+
+    const content=document.getElementById("content");
+
+    content.innerHTML="";
+
+    days.forEach(day=>{
+
+        const board=document.createElement("div");
+
+        board.className="board";
+
+        const title=document.createElement("h2");
+
+        title.innerText=day.date;
+
+        board.appendChild(title);
+
+        const table=document.createElement("table");
+
+        const thead=document.createElement("thead");
+
+        const headRow=document.createElement("tr");
+
+        day.provinces.forEach(p=>{
+
+            const th=document.createElement("th");
+
+            th.innerText=p.province;
+
+            headRow.appendChild(th);
+
+        });
+
+        thead.appendChild(headRow);
+
+        table.appendChild(thead);
+
+        const tbody=document.createElement("tbody");
+
+        for(let i=0;i<18;i++){
+
+            const tr=document.createElement("tr");
+
+            day.provinces.forEach(p=>{
+
+                const td=document.createElement("td");
+
+                td.innerText=p.results[i]||"";
+
+                tr.appendChild(td);
+
+            });
+
+            tbody.appendChild(tr);
+
+        }
+
+        table.appendChild(tbody);
+
+        board.appendChild(table);
+
+        const btn=document.createElement("button");
+
+        btn.className="copyBtn";
+
+        btn.innerText="📋 Copy";
+
+        btn.onclick=()=>copyBoard(day);
+
+        board.appendChild(btn);
+
+        content.appendChild(board);
+
+    });
+
+}
+
+function copyBoard(day){
+
+    let text="";
+
+    for(let i=0;i<18;i++){
+
+        const row=[];
+
+        day.provinces.forEach(p=>{
+
+            row.push(p.results[i]||"");
+
+        });
+
+        text+=row.join("\t")+"\n";
+
+    }
+
+    navigator.clipboard.writeText(text);
+
+    alert("Đã copy!");
+
+}
+
+</script>
+
+</body>
+
+</html>
